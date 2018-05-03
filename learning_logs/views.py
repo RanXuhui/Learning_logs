@@ -28,8 +28,6 @@ def topic(request, topic_id):
     # 请确认请求的主题属于当前用户
     if topic.owner != request.user:
         raise Http404
-
-
     entries = topic.entry_set.order_by('-date_added')
     context = {'topic': topic, 'entries': entries}
     return render(request, 'learning_logs/topic.html', context)
@@ -48,9 +46,6 @@ def new_topic(request):
             new_topic = form.save(commit=False)
             new_topic.owner = request.user
             new_topic.save()
-
-
-
             form.save()
             return HttpResponseRedirect(reverse('learning_logs:topics'))
 
@@ -84,6 +79,8 @@ def edit_entry(request, entry_id):
     """编辑既有条目"""
     entry = Entry.objects.get(id=entry_id)
     topic = entry.topic
+    if topic.owner != request.user:
+        raise Http404
 
     if request.method != 'POST':
         # 初次请求，使用当前条目填充表单
